@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flyka Curtains | Photo Manager</title><script src="https://upload-widget.cloudinary.com/latest/global/all.js"></script>
+<style>body{margin:0;background:#0b0b0c;color:#f4f4f2;font-family:Arial;padding:30px}.wrap{max-width:680px;margin:auto}.card{background:#151517;border:1px solid #303034;border-radius:16px;padding:28px}.logo{width:120px}.muted{color:#aaa}select,input,button{width:100%;padding:13px;margin-top:10px;border-radius:8px;border:1px solid #444;background:#222;color:#fff}button{cursor:pointer;background:#ddd;color:#111;border:0;font-weight:600}.hidden{display:none}.status{margin-top:18px;padding:12px;border-radius:8px;background:#202024;line-height:1.5}.hint{font-size:12px;color:#999;margin-top:8px}</style></head>
+<body><div class="wrap"><div class="card"><img class="logo" src="images/logo.jpg" alt="Flyka Curtains"><h1>Photo Manager</h1>
+<p class="muted">Upload photos into a main category and a model/design group. You can create new groups whenever you need them.</p>
+<div id="login"><label>Admin password</label><input id="pw" type="password" placeholder="Enter password"><button onclick="login()">Continue</button></div>
+<div id="app" class="hidden"><label>Main category</label><select id="cat" onchange="updateSubcats()">
+<option value="zebra">Zebra Blinds</option><option value="roman">Roman Blinds</option><option value="track">Track Curtains</option><option value="ripple">Ripple Curtains</option><option value="roller">Roller Blinds</option><option value="pvc">PVC Blinds</option><option value="wallpapers">Wallpapers</option><option value="mosquito">Mosquito Nets</option></select>
+<label style="display:block;margin-top:18px">Model / Group</label><select id="sub"></select>
+<input id="custom" placeholder="Or type a new group (e.g. B90, FH2, Motorized)">
+<div class="hint">Zebra groups already included: B30, B40, B70, FH, MA, BM3. Type a new group for any category whenever needed.</div>
+<button onclick="openUpload()">Upload Photos</button><div id="status" class="status">Choose a category and group, then upload photos.</div></div>
+</div></div>
+<script>
+const subs={zebra:["B30","B40","B70","FH","MA","BM3"],roman:[],track:[],ripple:[],roller:[],pvc:[],wallpapers:[],mosquito:[]};
+async function login(){const pw=document.getElementById('pw').value;const r=await fetch('/.netlify/functions/auth',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:pw})});const d=await r.json();if(d.ok){sessionStorage.setItem('flyka_admin',d.token);document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');updateSubcats()}else alert('Incorrect password');}
+function updateSubcats(){const cat=document.getElementById('cat').value,sel=document.getElementById('sub');sel.innerHTML='';(subs[cat]||[]).forEach(x=>sel.add(new Option(x,x)));sel.add(new Option('General','General'));}
+function openUpload(){if(!sessionStorage.getItem('flyka_admin'))return;const category=document.getElementById('cat').value;const typed=document.getElementById('custom').value.trim();const sub=typed||document.getElementById('sub').value||'General';const clean=sub.toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');if(!clean){alert('Please choose or enter a group.');return;}
+const tags=['flyka','flyka_cat_'+category,'flyka_sub_'+clean];const widget=cloudinary.createUploadWidget({cloudName:'n3izhkfu',uploadPreset:'flyka_portfolio',sources:['local','camera'],multiple:true,maxFileSize:10000000,clientAllowedFormats:['jpg','jpeg','png','webp'],showAdvancedOptions:false,tags:tags},(error,result)=>{if(error){document.getElementById('status').textContent='Upload error. Please try again.';return;}if(result&&result.event==='success')document.getElementById('status').textContent='Uploaded to '+category+' → '+sub+'.'});widget.open();}
+updateSubcats();
+</script></body></html>

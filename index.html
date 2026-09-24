@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flyka Curtains | Our Works</title>
+<style>
+:root{--bg:#0b0b0c;--panel:#141416;--text:#f4f4f2;--muted:#a9a9a5;--line:#2b2b2e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+button{font:inherit;color:inherit}header{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:55px 22px;text-align:center;background:radial-gradient(circle at 50% 20%,#2a2a2d,#101012 38%,#080809 75%)}
+.hero{max-width:900px}.logo{width:min(240px,58vw);border-radius:10px;margin-bottom:22px;mix-blend-mode:screen}.eyebrow{letter-spacing:.28em;color:#aaa;font-size:11px;margin:10px 0 18px}
+h1{font-size:clamp(40px,8vw,74px);letter-spacing:.12em;margin:0 0 12px;font-weight:400}.tagline{font-size:14px;letter-spacing:.26em;color:#aaa;text-transform:uppercase}
+.cta{display:inline-block;margin-top:32px;padding:13px 23px;border:1px solid #777;border-radius:30px;letter-spacing:.12em;text-transform:uppercase;font-size:11px;text-decoration:none;color:#fff}
+main{max-width:1200px;margin:auto;padding:65px 20px}.intro{text-align:center;margin-bottom:42px}.intro h2{font-size:34px;font-weight:400;margin:0 0 12px}.intro p{color:var(--muted);max-width:650px;margin:auto;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;padding:0 0 17px;transition:.2s;text-align:left;cursor:pointer}.card:hover{transform:translateY(-3px);border-color:#666}
+.ph{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#252527,#111113);color:#888;text-transform:uppercase;letter-spacing:.12em;font-size:11px}.card h3{font-size:17px;font-weight:500;margin:17px 17px 6px}.card p{font-size:12px;color:var(--muted);margin:0 17px}
+.viewer{display:none;margin-top:60px}.viewer.active{display:block}.viewer-head{border-bottom:1px solid var(--line);padding-bottom:17px;margin-bottom:20px;display:flex;justify-content:space-between;gap:15px;align-items:end;flex-wrap:wrap}
+.viewer-head span{font-size:10px;letter-spacing:.3em;color:#888}.viewer-head h2{font-size:30px;font-weight:400;margin:8px 0 0}.groups{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px}
+.group-btn{background:#18181b;border:1px solid #3a3a3e;border-radius:22px;padding:10px 15px;cursor:pointer;font-size:12px}.group-btn.active{background:#eee;color:#111;border-color:#eee}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:#111113;cursor:pointer}.loading,.empty{grid-column:1/-1;text-align:center;padding:45px;color:#777;border:1px dashed #333;border-radius:12px}
+.back{background:none;border:1px solid #555;border-radius:22px;padding:9px 15px;cursor:pointer;color:#ddd}footer{border-top:1px solid var(--line);padding:55px 20px;text-align:center;color:var(--muted);margin-top:80px}footer strong{color:var(--text);font-weight:500}.contact{margin:22px auto;line-height:1.9}footer a{color:inherit}
+@media(max-width:850px){.grid,.photo-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid,.photo-grid{grid-template-columns:1fr}.ph{height:210px}main{padding-top:50px}}
+</style></head><body>
+<header><div class="hero"><img class="logo" src="images/logo.jpg" alt="Flyka Curtains logo">
+<div class="eyebrow">CURTAINS • BLINDS • WALLPAPERS • MOSQUITO NETS</div><h1>FLYKA CURTAINS</h1><div class="tagline">Explore Our Works</div>
+<a class="cta" href="#works">View Categories</a></div></header>
+<main id="works"><div class="intro"><h2>Our Works</h2><p>Choose a category, then browse individual models, designs or groups.</p></div>
+<div class="grid"><button class="card" onclick="showCategory('zebra')"><div class="ph">Zebra Blinds</div><h3>Zebra Blinds</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('roman')"><div class="ph">Roman Blinds</div><h3>Roman Blinds</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('track')"><div class="ph">Track Curtains</div><h3>Track Curtains</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('ripple')"><div class="ph">Ripple Curtains</div><h3>Ripple Curtains</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('roller')"><div class="ph">Roller Blinds</div><h3>Roller Blinds</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('pvc')"><div class="ph">PVC Blinds</div><h3>PVC Blinds</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('wallpapers')"><div class="ph">Wallpapers</div><h3>Wallpapers</h3><p>View groups & projects</p></button><button class="card" onclick="showCategory('mosquito')"><div class="ph">Mosquito Nets</div><h3>Mosquito Nets</h3><p>View groups & projects</p></button></div>
+<div id="viewer" class="viewer"><div class="viewer-head"><div><span>FLYKA CURTAINS</span><h2 id="viewerTitle">Category</h2></div><button class="back" onclick="closeCategory()">← All Categories</button></div>
+<div id="groups" class="groups"></div><div id="photos" class="photo-grid"><div class="loading">Loading photos…</div></div></div></main>
+<footer><strong>FLYKA CURTAINS</strong><div class="contact">17/511-A, B, C, D, Thoduvetti, Sulthan Bathery, Wayanad – 673579<br>
+<a href="tel:+919995908910">+91 99959 08910</a> · <a href="tel:+919037560678">+91 90375 60678</a></div>
+<a href="https://www.instagram.com/flykaonline/" target="_blank" rel="noopener">Instagram @flykaonline</a></footer>
+<script>
+const names={zebra:"Zebra Blinds",roman:"Roman Blinds",track:"Track Curtains",ripple:"Ripple Curtains",roller:"Roller Blinds",pvc:"PVC Blinds",wallpapers:"Wallpapers",mosquito:"Mosquito Nets"};
+let currentResources=[];
+async function showCategory(category){
+ document.querySelector('.grid').style.display='none'; const viewer=document.getElementById('viewer'); viewer.classList.add('active');
+ document.getElementById('viewerTitle').textContent=names[category]||category; document.getElementById('groups').innerHTML='<div class="loading">Loading groups…</div>';
+ document.getElementById('photos').innerHTML='<div class="loading">Loading photos…</div>'; location.hash=category;
+ try{const r=await fetch('/.netlify/functions/gallery?category='+encodeURIComponent(category)); const data=await r.json(); currentResources=data.resources||[]; buildGroups();}
+ catch(e){document.getElementById('groups').innerHTML='';document.getElementById('photos').innerHTML='<div class="empty">Gallery temporarily unavailable.</div>';}
+ viewer.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function buildGroups(){
+ const map={};
+ currentResources.forEach(x=>{const tag=(x.tags||[]).find(t=>t.startsWith('flyka_sub_')); const label=tag?tag.slice(10).replace(/_/g,' '):'General'; const key=tag||'general'; if(!map[key])map[key]={label,key};});
+ const groups=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
+ if(!groups.length){document.getElementById('groups').innerHTML='';renderPhotos([]);return;}
+ document.getElementById('groups').innerHTML='<button class="group-btn active" onclick="selectGroup(\'all\',this)">All</button>'+
+ groups.map(g=>'<button class="group-btn" onclick="selectGroup(\''+g.key+'\',this)">'+titleCase(g.label)+'</button>').join('');
+ selectGroup('all',document.querySelector('.group-btn'));
+}
+function selectGroup(key,btn){document.querySelectorAll('.group-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderPhotos(key==='all'?currentResources:currentResources.filter(x=>(x.tags||[]).includes(key)));}
+function renderPhotos(items){const el=document.getElementById('photos');if(!items.length){el.innerHTML='<div class="empty">New project photos will appear here.</div>';return;}el.innerHTML=items.map(x=>'<img loading="lazy" src="'+x.url+'" alt="Flyka Curtains project" onclick="window.open(\''+x.url+'\',\'_blank\')">').join('');}
+function closeCategory(){document.getElementById('viewer').classList.remove('active');document.querySelector('.grid').style.display='grid';history.replaceState(null,'',location.pathname);window.scrollTo({top:document.getElementById('works').offsetTop-20,behavior:'smooth'});}
+function titleCase(s){return s.replace(/\b\w/g,c=>c.toUpperCase())}
+window.addEventListener('load',()=>{const h=location.hash.slice(1);if(names[h])showCategory(h)});
+</script></body></html>
