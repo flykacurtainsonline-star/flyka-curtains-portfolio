@@ -28,17 +28,20 @@ async function cloudRequest(url, options, cfg){
 function formBody(params){
   const p=new URLSearchParams();
   for(const [k,v] of Object.entries(params)){
-    if(Array.isArray(v)) v.forEach(x=>p.append(k+'[]',x));
-    else if(v!==undefined&&v!==null) p.append(k,String(v));
+    if(Array.isArray(v)) p.set(k,v.join(','));
+    else if(v!==undefined&&v!==null) p.set(k,String(v));
   }
   return p.toString();
 }
 
+
 const tagUrl=(cfg)=>`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloud)}/resources/image/tags`;
 async function tagCommand(cfg, command, publicIds, tag){
   if(!publicIds.length) return;
-  await cloudRequest(tagUrl(cfg),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:formBody({public_ids:publicIds,command,tag})},cfg);
+  const body=formBody({command, public_ids:publicIds, tag});
+  await cloudRequest(tagUrl(cfg),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body},cfg);
 }
+
 
 exports.handler=async(event)=>{
   if(event.httpMethod!=='POST') return json(405,{ok:false,error:'Method Not Allowed'});
@@ -82,8 +85,14 @@ exports.handler=async(event)=>{
       const publicIds=Array.isArray(body.category_public_ids)?body.category_public_ids.filter(Boolean):[];
       if(!publicId||!allowed.has(category)) return json(400,{ok:false,error:'Invalid photo or category'});
       const coverTag=`flyka_cover_${category}`;
-      // Remove the cover marker from every photo currently shown in this category, then add it to the selected photo.
-      await tagCommand(cfg,'remove',publicIds,coverTag);
+      // Find any existing cover directly by its cover tag, then remove it before assigning the new cover.
+      const searchUrl=`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloud)}/resources/search`;
+      const searchAuth=Buffer.from(`${cfg.key}:${cfg.secret}`).toString('base64');
+      const sr=await fetch(searchUrl,{method:'POST',headers:{Authorization:`Basic ${searchAuth}`,'Content-Type':'application/json'},body:JSON.stringify({expression:`tags=${coverTag}`,max_results:500,with_field:'tags'})});
+      const sd=await sr.json();
+      if(!sr.ok) throw new Error(sd.error?.message||'Could not find existing cover');
+      const existing=(sd.resources||[]).map(x=>x.public_id).filter(Boolean);
+      await tagCommand(cfg,'remove',existing,coverTag);
       await tagCommand(cfg,'add',[publicId],coverTag);
       return json(200,{ok:true,category});
     }
