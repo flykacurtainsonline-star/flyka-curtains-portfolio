@@ -30,20 +30,36 @@ main{max-width:1200px;margin:auto;padding:65px 20px}.intro{text-align:center;mar
 <a href="https://www.instagram.com/flykaonline/" target="_blank" rel="noopener">Instagram @flykaonline</a></footer>
 <script>
 const names={zebra:"Zebra Blinds",roman:"Roman Blinds",track:"Track Curtains",ripple:"Ripple Curtains",roller:"Roller Blinds",pvc:"PVC Blinds",wallpapers:"Wallpapers",mosquito:"Mosquito Nets"};
-let currentResources=[];
+let currentResources=[]; let currentCategory='';
 async function showCategory(category){
  document.querySelector('.grid').style.display='none'; const viewer=document.getElementById('viewer'); viewer.classList.add('active');
- document.getElementById('viewerTitle').textContent=names[category]||category; document.getElementById('groups').innerHTML='<div class="loading">Loading groups…</div>';
+ currentCategory=category; document.getElementById('viewerTitle').textContent=names[category]||category; document.getElementById('groups').innerHTML='<div class="loading">Loading groups…</div>';
  document.getElementById('photos').innerHTML='<div class="loading">Loading photos…</div>'; location.hash=category;
  try{const r=await fetch('/.netlify/functions/gallery?category='+encodeURIComponent(category)); const data=await r.json(); currentResources=data.resources||[]; buildGroups();}
  catch(e){document.getElementById('groups').innerHTML='';document.getElementById('photos').innerHTML='<div class="empty">Gallery temporarily unavailable.</div>';}
  viewer.scrollIntoView({behavior:'smooth',block:'start'});
 }
+const defaultGroups={
+ zebra:[['b30','B30'],['b40','B40'],['b70','B70'],['fh','FH'],['ma','MA'],['bm3','BM3']]
+};
 function buildGroups(){
  const map={};
- currentResources.forEach(x=>{const tag=(x.tags||[]).find(t=>t.startsWith('flyka_sub_')); const label=tag?tag.slice(10).replace(/_/g,' '):'General'; const key=tag||'general'; if(!map[key])map[key]={label,key};});
- const groups=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
- if(!groups.length){document.getElementById('groups').innerHTML='';renderPhotos([]);return;}
+ const defaults=defaultGroups[currentCategory]||[];
+ defaults.forEach(([key,label])=>map['flyka_sub_'+key]={label,key:'flyka_sub_'+key});
+ currentResources.forEach(x=>{
+   const tag=(x.tags||[]).find(t=>t.startsWith('flyka_sub_'));
+   const label=tag?tag.slice(10).replace(/_/g,' '):'General';
+   const key=tag||'general';
+   if(!map[key])map[key]={label,key};
+ });
+ const groups=Object.values(map).sort((a,b)=>{
+   const ai=defaults.findIndex(d=>'flyka_sub_'+d[0]===a.key);
+   const bi=defaults.findIndex(d=>'flyka_sub_'+d[0]===b.key);
+   if(ai>=0 && bi>=0)return ai-bi;
+   if(ai>=0)return -1;
+   if(bi>=0)return 1;
+   return a.label.localeCompare(b.label);
+ });
  document.getElementById('groups').innerHTML='<button class="group-btn active" onclick="selectGroup(\'all\',this)">All</button>'+
  groups.map(g=>'<button class="group-btn" onclick="selectGroup(\''+g.key+'\',this)">'+titleCase(g.label)+'</button>').join('');
  selectGroup('all',document.querySelector('.group-btn'));
