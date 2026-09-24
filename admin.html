@@ -28,11 +28,40 @@ function authHeaders(){return {'content-type':'application/json','Authorization'
 function groupLabel(tags){const t=(tags||[]).find(x=>x.startsWith('flyka_sub_'));return t?t.slice(10).replace(/_/g,' '):'General';}
 function groupOptions(category,current){const list=[...(subs[category]||[]),'General'];if(current&&current!=='General'&&!list.includes(current))list.push(current);return list.map(x=>'<option '+(x.toLowerCase()===current.toLowerCase()?'selected':'')+'>'+x+'</option>').join('');}
 async function loadManager(){if(!sessionStorage.getItem('flyka_admin'))return;const cat=document.getElementById('cat').value;const manager=document.getElementById('manager');manager.classList.remove('hidden');manager.innerHTML='<div class="manager-title"><h3>Manage '+names[cat]+'</h3><span class="muted">Loading…</span></div>';try{const r=await fetch('/.netlify/functions/gallery?category='+encodeURIComponent(cat));const d=await r.json();if(!d.ok)throw new Error(d.error||'Could not load photos');renderManager(cat,d.resources||[]);}catch(e){manager.innerHTML='<div class="empty-manage">Could not load photos: '+e.message+'</div>';}}
-function renderManager(category,items){const manager=document.getElementById('manager');if(!items.length){manager.innerHTML='<div class="manager-title"><h3>Manage '+names[category]+'</h3></div><div class="empty-manage">No photos in this category yet.</div>';return;}manager.innerHTML='<div class="manager-title"><h3>Manage '+names[category]+'</h3><span class="muted">'+items.length+' photo(s)</span></div>'+items.map((x,i)=>{const group=groupLabel(x.tags);return '<div class="photo-item" id="photo-'+i+'"><img class="thumb" src="'+x.url+'" alt="Flyka project"><div class="photo-meta"><strong>'+names[category]+'</strong><div class="tagline">Current group: <b>'+group+'</b></div><div class="actions"><select id="move-cat-'+i+'" onchange="refreshMoveGroup('+i+')">'+categories.map(([k,n])=>'<option value="'+k+'" '+(k===category?'selected':'')+'>'+n+'</option>').join('')+'</select><select id="move-group-'+i+'">'+groupOptions(category,group)+'</select><button class="secondary" onclick="movePhoto('+i+','+JSON.stringify(x).replace(/</g,'\u003c')+')">Move / Fix</button><button class="secondary" onclick="setCover('+i+','+JSON.stringify(x).replace(/</g,'\u003c')+')">Set as Cover</button><button class="danger" onclick="deletePhoto('+i+','+JSON.stringify(x.public_id).replace(/</g,'\u003c')+')">Delete Photo</button></div></div></div>';}).join('');}
+function renderManager(category,items){
+  window._managerItems=items;
+  const manager=document.getElementById('manager');
+  if(!items.length){manager.innerHTML='<div class="manager-title"><h3>Manage '+names[category]+'</h3></div><div class="empty-manage">No photos in this category yet.</div>';return;}
+  manager.innerHTML='<div class="manager-title"><h3>Manage '+names[category]+'</h3><span class="muted">'+items.length+' photo(s)</span></div>'+
+    items.map((x,i)=>{const group=groupLabel(x.tags);return '<div class="photo-item" id="photo-'+i+'"><img class="thumb" src="'+escapeHtml(x.url)+'" alt="Flyka project"><div class="photo-meta"><strong>'+names[category]+'</strong><div class="tagline">Current group: <b>'+escapeHtml(group)+'</b></div><div class="actions"><select id="move-cat-'+i+'" onchange="refreshMoveGroup('+i+')">'+categories.map(([k,n])=>'<option value="'+k+'" '+(k===category?'selected':'')+'>'+n+'</option>').join('')+'</select><select id="move-group-'+i+'">'+groupOptions(category,group)+'</select><button type="button" class="secondary" onclick="movePhotoByIndex('+i+')">Move / Fix</button><button type="button" class="secondary" onclick="setCoverByIndex('+i+')">Set as Cover</button><button type="button" class="danger" onclick="deletePhotoByIndex('+i+')">Delete Photo</button></div></div></div>';}).join('');
+}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function refreshMoveGroup(i){const cat=document.getElementById('move-cat-'+i).value;const current=document.getElementById('move-group-'+i).value||'General';document.getElementById('move-group-'+i).innerHTML=groupOptions(cat,current);}
-async function movePhoto(i,x){const category=document.getElementById('move-cat-'+i).value;const group=document.getElementById('move-group-'+i).value||'General';if(!confirm('Move this photo to '+names[category]+' → '+group+'?'))return;const r=await fetch('/.netlify/functions/manage',{method:'POST',headers:authHeaders(),body:JSON.stringify({action:'move',public_id:x.public_id,category,group,tags:x.tags||[]})});const d=await r.json();if(!d.ok)return alert(d.error||'Move failed');document.getElementById('status').textContent='Photo moved to '+names[category]+' → '+group+'.';loadManager();}
-async function setCover(i,x){const category=document.getElementById('cat').value;if(!confirm('Use this photo as the '+names[category]+' homepage cover?'))return;const r=await fetch('/.netlify/functions/manage',{method:'POST',headers:authHeaders(),body:JSON.stringify({action:'cover',public_id:x.public_id,category,category_public_ids:window._managerItems?window._managerItems.map(a=>a.public_id):[x.public_id]})});const d=await r.json();if(!d.ok)return alert(d.error||'Could not set cover');document.getElementById('status').textContent='Homepage cover updated.';loadManager();}
-async function deletePhoto(i,publicId){if(!confirm('Delete this photo permanently? This removes it from Cloudinary and the portfolio.'))return;const r=await fetch('/.netlify/functions/manage',{method:'POST',headers:authHeaders(),body:JSON.stringify({action:'delete',public_id:publicId})});const d=await r.json();if(!d.ok)return alert(d.error||'Delete failed');document.getElementById('status').textContent='Photo deleted.';loadManager();}
-const oldRenderManager=renderManager;renderManager=function(category,items){window._managerItems=items;oldRenderManager(category,items);};
+async function manageRequest(payload){
+  try{
+    const r=await fetch('/.netlify/functions/manage',{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)});
+    const text=await r.text(); let d={}; try{d=JSON.parse(text)}catch(_){d={ok:false,error:text||('HTTP '+r.status)}}
+    if(!r.ok || !d.ok) throw new Error(d.error||('Request failed (HTTP '+r.status+')'));
+    return d;
+  }catch(e){document.getElementById('status').textContent='Error: '+e.message;throw e;}
+}
+async function movePhotoByIndex(i){
+  const x=window._managerItems[i]; if(!x)return;
+  const category=document.getElementById('move-cat-'+i).value;
+  const group=document.getElementById('move-group-'+i).value||'General';
+  if(!confirm('Move this photo to '+names[category]+' → '+group+'?'))return;
+  try{await manageRequest({action:'move',public_id:x.public_id,category,group,tags:x.tags||[]});document.getElementById('status').textContent='Photo moved to '+names[category]+' → '+group+'.';await loadManager();}catch(_){ }
+}
+async function setCoverByIndex(i){
+  const x=window._managerItems[i]; if(!x)return;
+  const category=document.getElementById('cat').value;
+  if(!confirm('Use this photo as the '+names[category]+' homepage cover?'))return;
+  try{await manageRequest({action:'cover',public_id:x.public_id,category,category_public_ids:window._managerItems.map(a=>a.public_id)});document.getElementById('status').textContent='Homepage cover updated.';await loadManager();}catch(_){ }
+}
+async function deletePhotoByIndex(i){
+  const x=window._managerItems[i]; if(!x)return;
+  if(!confirm('Delete this photo permanently? This removes it from Cloudinary and the portfolio.'))return;
+  try{await manageRequest({action:'delete',public_id:x.public_id});document.getElementById('status').textContent='Photo deleted.';await loadManager();}catch(_){ }
+}
 updateSubcats();
 </script></body></html>
