@@ -1,6 +1,9 @@
-FLYKA CURTAINS PORTFOLIO V4
-Main categories: Zebra Blinds, Roman Blinds, Track Curtains, Ripple Curtains, Roller Blinds, PVC Blinds, Wallpapers, Mosquito Nets.
-Zebra initial groups: B30, B40, B70, FH, MA, BM3.
-Admin can type a new group for any category. Public galleries automatically discover groups from Cloudinary tags.
-Required Netlify variables: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, FLYKA_ADMIN_PASSWORD.
-Keep API secret and admin password private.
+Flyka Curtains Portfolio
+
+Main categories: Zebra Blinds, Roman Blinds, Track Curtains, Ripple Curtains, Roller Blinds, Venition Blinds, PVC Blinds, Wallpapers, Mosquito Nets.
+
+Admin page: /admin.html
+Cloudinary upload preset: flyka_portfolio
+Cloudinary tags used by uploads: flyka_cat_<category>, flyka_sub_<group>, and optionally flyka_cover_<category>.
+
+Netlify environment variables: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, FLYKA_ADMIN_PASSWORD.
